@@ -4,8 +4,8 @@ require File.expand_path('../lib/capistrano-monit/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Andrew Eberbach"]
   gem.email         = ["andrew@ebertech.ca"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Monit deployment helper}
+  gem.summary       = %q{Monit deployment helper}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)

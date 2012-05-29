@@ -1,0 +1,114 @@
+#!/bin/bash
+eval HOME=~`whoami`
+
+RC_FILE=$1
+shift
+
+start() {
+    shift
+    if ! mkdir -p "$(dirname "$PIDFILE")"
+            then
+            echo "Failed making $(dirname "$PIDFILE")"
+            exit 3
+    fi
+
+    if ! mkdir -p "$(dirname "$LOGFILE")"
+            then
+            echo "Failed making $(dirname "$LOGFILE")"
+            exit 4
+    fi
+
+    echo $$ > "$PIDFILE";
+
+    if [ -z "$1" ]
+            then
+            echo "You must pass in a command to execute"
+            usage
+    fi
+    echo "Writing to $LOGFILE"
+
+    exec bash -c "$@ >> $LOGFILE 2>&1"
+}
+
+stop() {
+	if [ -f "$PIDFILE" ]
+		then
+		echo "killing $PIDFILE"
+		if pkill -TERM -P $(cat "$PIDFILE")
+			then		
+			rm "$PIDFILE"
+		else
+			echo "Failed to kill, leaving pidfile."
+			exit 2
+		fi		
+	else
+		echo "No such pid file $PIDFILE"
+		exit 3
+	fi
+}
+
+usage() {
+	echo "usage: $0 [PATH_TO_RC] {start|stop|restart} COMMAND [ARG1, ARG2...]"
+	exit 1
+}
+
+if [ -z "$RC_FILE" ]
+	then
+	RC_FILE=$HOME/.rvmmonitrc
+fi
+
+if [ -f "$RC_FILE" ]
+	then
+	source "$RC_FILE"
+else
+	echo "The first argument needs to be a path to a file that will be sourced before running since $RC_FILE does not exist"
+	usage
+fi
+
+# Load RVM into a shell session *as a function*
+if [[ -s "$HOME/.rvm/scripts/rvm" ]] ; then
+	# First try to load from a user install
+	source "$HOME/.rvm/scripts/rvm"
+elif [[ -s "/usr/local/rvm/scripts/rvm" ]] ; then
+	# Then try to load from a root install
+	source "/usr/local/rvm/scripts/rvm"
+else
+	printf "ERROR: An RVM installation was not found.\n"
+	exit 2
+fi
+
+if [ -z "$LOGFILE" ] 
+	then
+	echo "You must specify a LOGFILE environment variable. You can put it in $RC_FILE"
+	usage
+fi
+
+if [ -z "$PIDFILE" ] 
+	then
+	echo "You must specify a PIDFILE environment variable. You can put it in $RC_FILE"
+	usage
+fi
+
+if [ -z "$RVM_STRING" ] 
+	then
+	echo "You must specify a RVM_STRING environment variable. You can put it in $RC_FILE"
+	usage
+fi
+
+rvm use "$RVM_STRING" > /dev/null 2>&1
+
+case $1 in
+	start)
+		start $*
+	;;
+	stop)  
+		stop
+	;;
+	restart)  
+		stop
+		start $*
+	;;	
+	*)  
+	usage ;;
+esac
+exit 0

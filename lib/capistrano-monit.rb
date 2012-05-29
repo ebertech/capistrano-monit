@@ -1,7 +1,5 @@
-require "capistrano-monit/version"
-
 module Capistrano
   module Monit
-    # Your code goes here...
+    autoload :VERSION, "capistrano-monit/version"
   end
 end

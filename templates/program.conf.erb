@@ -1,0 +1,7 @@
+check process <%= unique_name %>
+    with pidfile <%= pidfile_path %>
+        start program = "<%= start_command %>" 
+        stop program = "<%= stop_command %>" 
+		<% each_dependency do |dependency| %>
+			depends on <%= dependency %>
+		<% end %>

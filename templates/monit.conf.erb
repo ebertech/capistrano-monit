@@ -1,0 +1,25 @@
+set daemon  5
+set logfile <%= home_dir %>/var/log/monit.log
+set idfile <%= home_dir %>/var/monit/id
+set statefile <%= home_dir %>/var/monit/state
+
+set eventqueue
+basedir <%= home_dir %>/var/monit/eventqueue  # set the base directory where events will be stored
+slots 1000           # optionally limit the queue size
+
+set mail-format { 
+from: monit@ebertech.ca 
+subject: [monit] $SERVICE $EVENT	
+message: $EVENT Service $SERVICE
+Host:        $HOST 
+Date:        $DATE
+Action:      $ACTION 
+Description: $DESCRIPTION 
+}
+set mmonit https://monit:monit@mmonit.ebertech.ca/collector
+
+set httpd port <%= port %> and
+allow localhost
+allow mmonit.ebertech.ca
+
+Include <%= monitd_path %>/*.conf
